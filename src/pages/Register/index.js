@@ -6,36 +6,57 @@ console.disableYellowBox=true;
 
 import { useNavigation } from "@react-navigation/native";
 
-export default function Login(){
+export default function Register(){
     const navigation = useNavigation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [name, setName] = useState('')
 
+   
 
-    function cadastrar(){
-        navigation.navigate('Register')
-    }
-
-    async function logar(){
-        await firebase.auth().signInWithEmailAndPassword(email, password)
+    async function cadastrar(){
+        await firebase.auth().createUserWithEmailAndPassword(email, password)
         .then((value)=>{
-            alert('Bem-vindo! '+ value.user.email);
-            navigation.navigate('Home', {email: value.user.email, nome:value.user.nome})
+            alert('Usuário criado! '+ value.user.email);
+            firebase.database().ref('usuarios').child(value.user.uid).set({
+                nome: name
+            }) 
         })
-        .catch(()=>{
-            alert('Algo deu errado!')
-            return;
+        .catch((error)=>{
+            if(error.code === 'auth/weak-password'){
+                alert('Sua senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
+            if(error.code === 'auth/invalid-email'){
+                alert('email inválido!')
+                return;
+            }else{
+                alert('Algo deu errado!')
+                return;
+            }
         })
 
         Keyboard.dismiss();
+        setName('')
         setEmail('')
         setPassword('')
+    }
+
+    function logar(){
+        navigation.navigate('Login')
     }
 
     return(
         <View style={styles.container}>
 
             <View style={styles.viewInput}>
+                <TextInput 
+                style={styles.input}
+                placeholder="Nome"
+                underlineColorAndroid='transparent'
+                onChangeText={ (texto) => setName(texto) }
+                value={name}
+                />
 
                 <TextInput 
                 style={styles.input}
@@ -53,16 +74,16 @@ export default function Login(){
                 value={password}
                 />
             </View>
-           
-            <View style={styles.btnArea}> 
-                <TouchableOpacity style={styles.btn} onPress={logar}>
-                    <Text style={styles.btnTexto}>Logar</Text>
-                </TouchableOpacity>
-            </View>
 
             <View style={styles.btnAreaCad}> 
                 <TouchableOpacity style={styles.btn} onPress={cadastrar}>
                     <Text style={styles.btnTexto}>Cadastrar</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.btnArea}> 
+                <TouchableOpacity style={styles.btn} onPress={logar}>
+                    <Text style={styles.btnTexto}>Logar</Text>
                 </TouchableOpacity>
             </View>
 
@@ -89,26 +110,26 @@ const styles = StyleSheet.create({
         marginTop: 7
     },
     viewInput:{
-        marginTop: 230
+        marginTop: 200
     },
     btn:{
         flex:1,
         justifyContent:'center',
         alignItems: 'center',
-        backgroundColor: '#002200',
+        backgroundColor: '#054F77',
         height: 40,
         borderRadius: 20
-    },
-    btnArea:{
-        marginTop:19,
-        height: 40,
-        width: 320
     },
     btnTexto:{
         color: '#FFF'
     },
     btnAreaCad:{
         marginTop:10,
+        height: 40,
+        width: 320
+    },
+    btnArea:{
+        marginTop:19,
         height: 40,
         width: 320
     }

@@ -2,9 +2,7 @@ import React, { useLayoutEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import firebase from '../../firebase/firebaseConnection';
 
-
-
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, StackActions } from "@react-navigation/native";
 
 export default function Home(){
     const navigation = useNavigation();
@@ -12,14 +10,14 @@ export default function Home(){
 
     useLayoutEffect(() => {
         navigation.setOptions({
-          title: route.params?.email === '' ? 'Pagina Inicial' : route.params?.email
+          title: route.params?.name === '' ? 'Pagina Inicial' : route.params?.name
         })
     
       }, [navigation])
 
       async function deslogar(){
         await firebase.auth().signOut();
-        navigation.goBack();
+        navigation.dispatch(StackActions.popToTop())
         alert('Deslogado com sucesso!');
     }
 
@@ -27,6 +25,7 @@ export default function Home(){
         <View style={styles.container}>
             <Text style={styles.text}>Bem-Vindo!</Text>
             <Text style={styles.text}>{route.params?.email}</Text>
+            <Text style={styles.text}>{route.params?.name}</Text>
 
             <View style={styles.btnArea}> 
                 <TouchableOpacity style={styles.btn} onPress={deslogar}>
